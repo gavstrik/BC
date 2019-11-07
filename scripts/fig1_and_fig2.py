@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from scipy.stats import mode, ks_2samp, mannwhitneyu, shapiro, pearsonr
+from scipy.stats import mode, ks_2samp, mannwhitneyu, shapiro, pearsonr, kstest
 import matplotlib.pyplot as plt
 from matplotlib import style
 import matplotlib.mlab as mlab
@@ -53,7 +53,7 @@ def plot_comparisons(df_1995, df_2002, df_AMT):
     data = df_1.guess.values.astype(int)
     ax0 = axes[0].hist(data, bins=bins, density=True)
     axes[0].set_title('1. Lab Experiments (1-5)', fontsize='smaller')
-    # print('\tShapiro_Wilk normality test, p-value:', shapiro(df_1.guess.values)[1])
+    print('\t Lab Experiments (1-5) Shapiro_Wilk normality test, p-value:', shapiro(df_1.guess.values)[1])
     avg = np.around(np.mean(df_1.guess.values),2)
     first, second, third, fourth, fifth = three_most_common_numbers(data)
     # print('\nmodes:', first, second, third, fourth, fifth)
@@ -126,6 +126,12 @@ def plot_comparisons(df_1995, df_2002, df_AMT):
     df_6 = df_2002[(df_2002['session'] == 15) |
                  (df_2002['session'] == 16) |
                  (df_2002['session'] == 17)]
+    df_15 = df_6[df_6['session'] == 15]
+    print('Spektrum der Wissenschaft:', np.mean(df_15.guess.values), np.mean(df_15.guess.values)*2/3)
+    df_16 = df_6[df_6['session'] == 16]
+    print('Expansion:', np.mean(df_16.guess.values), np.mean(df_16.guess.values)*2/3)
+    df_17 = df_6[df_6['session'] == 17]
+    print('Financial Times:', np.mean(df_17.guess.values), np.mean(df_17.guess.values)*2/3)
     data = df_6.guess.values.astype(int)
     ax5 = axes[5].hist(data, bins=bins, density=True)
     axes[5].set_title('6. Newspaper Experiments (15-17)', fontsize='smaller')
@@ -151,6 +157,10 @@ def plot_comparisons(df_1995, df_2002, df_AMT):
 
     # 8. AMT Experiments (23-109)
     df_8 = df_AMT
+    print('\t AMT Experiments (23-109) Shapiro_Wilk normality test, p-value:', shapiro(df_8.guess.values)[1])
+    print('\t AMT Experiments (23-109) KS-test onesided:', kstest(df_8.guess.values,'norm', alternative = 'less'))
+    print('\t AMT Experiments (23-109) KS-test onesided:', kstest(df_8.guess.values,'norm', alternative = 'greater'))
+    print('\t AMT Experiments (23-109) KS-test onesided:', kstest(df_8.guess.values,'norm', mode='asymp'))
     data = df_8.guess.values.astype(int)
     ax7 = axes[7].hist(data, bins=bins, density=True)
     axes[7].set_title('8. AMT Experiments (23-109)', fontsize='smaller')
@@ -270,6 +280,6 @@ df_all = df_all.append(df_2002, sort=True)
 df_all = df_all.append(df_AMT, sort=True)
 
 dfs = plot_comparisons(df_1995, df_2002, df_AMT)
-# make_table(dfs)
+make_table(dfs)
 plot_cdfs(dfs)
 # plot_QQplots(dfs)
