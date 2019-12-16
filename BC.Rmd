@@ -96,40 +96,80 @@ M0 = glm(avg ~ (round+round2)*as.factor(size)-1, data=amt)
 res = rstandard(M0)
 #res = resid(M0, type='pearson')
 #res = (res-mean(res))/sd(res)
-pdf("qq.pdf")
+# pdf("plots/qq.pdf")
 qqnorm(res); abline(0,1, col='red')
-dev.off()
+# dev.off()
 ```
-
-
-
-
-
 We see that almost all coeffiencts are highly significant. The `round2` is insignificant, hence the groups of only 2 players does not exhibit any quadratic form. The interaction between `round2` and groups of 4 is a borderline case, indicating that there might not be any quadratic relationship in this group either. However, the rest of the parameters are highly significant, indicating that (at least) a quadratic term is necessary for the groups of 8 players to describe the evolution of the group average over the course of 8 rounds.
 ```{r}
 summary(M0)
 ```
 However, we will only compare the regression model to 4 rounds from other studies, hence we refit the model using only the first 4 rounds. The fit is still very good.
 ```{r}
-M0 = glm(avg ~ (round+round2)*as.factor(size)-1, data=amt[amt$round<5,])
+M1 = glm(avg ~ (round+round2)*as.factor(size)-1, data=amt[amt$round<5,])
 
-res = resid(M0)
+res = resid(M1)
 res = (res-mean(res))/sd(res)
 qqnorm(res); abline(0,1, col='red')
 ```
 Besides, the quadratic term seems insignificant for the first 4 rounds.
 ```{r}
-summary(M0)
+summary(M1)
 ```
 A likelihood ratio test show that we can indeed remove the quadratic trend.
 ```{r}
-M1 = glm(avg ~ round*as.factor(size)-1, data=amt[amt$round<5,])
-anova(M0,M1, test='LRT')
+M2 = glm(avg ~ round*as.factor(size)-1, data=amt[amt$round<5,])
+anova(M1,M2, test='LRT')
 ```
-We find that all terms are now significant, and adapt `M1` as the final model.
+We find that all terms are now significant, and adapt `M2` as the final model.
 ```{r}
-summary(M1)
+summary(M2)
+library("texreg")
+mytable <- texreg(list(M0,M1,M2), label="tab:1", float.pos = "h", custom.model.names = c("Full model", "First 4 rounds", "no quadradic term"), caption = "Multiple model types, custom names, and single row.", digits = 3, leading.zero = FALSE, single.row = TRUE, omit.coef = "Inter")
 ```
+We plot the results of the full linear regression model
+```{r}
+tmp1 = expand.grid(size=as.factor(c(2,4,8)),round=1:8)
+tmp1$round2 = tmp1$round^2
+pred = predict(M0, newdata = tmp1, se.fit = TRUE)
+
+tmp = aggregate(avg ~ size+round, mean, data=amt)
+# tmp = aggregate(avg ~ (round+round2)*as.factor(size)-1, data=amt)
+tmp$fit = pred$fit
+tmp$fit.lo = pred$fit-1.96*pred$se.fit
+tmp$fit.hi = pred$fit+1.96*pred$se.fit
+
+plot(0,0, type='n', xlim=c(1,8), ylim=c(0,60), bty='n', xlab="round",ylab="average")
+plot1 <- function(size, col){
+  # size=2;col='red'
+  tmp2 = tmp[tmp$size==size,]
+  polygon(c(.95,2,3,4.05,4.05,3,2,.95), c(tmp2$fit.lo, rev(tmp2$fit.hi)), border=NA, col=add.alpha(col,.25))
+  # lines(1:4, tmp2$fit, col=add.alpha(col,.85), lwd=2)
+  # lines(1:4, tmp2$avg, col=add.alpha(col,.95), lwd=2, 'p', pch=4)
+}
+
+#tmp3 = aggregate(avg ~ size+round, mean, data=amt[amt$round>3,])
+#lines(4:8,tmp3[tmp3$size==2,]$avg, type='b',lty=3,pch=4, lwd=2, col=add.alpha('#e74c3c',.85))
+#lines(4:8,tmp3[tmp3$size==4,]$avg, type='b',lty=3,pch=4, lwd=2, col=add.alpha('orange',.85))
+#lines(4:8,tmp3[tmp3$size==8,]$avg, type='b',lty=3,pch=4, lwd=2, col=add.alpha('#4575b4',.85))
+
+plot1(2, '#e74c3c')
+plot1(4, 'orange')
+plot1(8, '#4575b4')
+
+#lines(1:2, chess,    type='b', lty=3, pch=1, lwd=1)
+#lines(1:10, w03,     type='b', lty=3, pch=2, lwd=1)
+#lines(1:5, kd08.14,  type='b', lty=3, pch=3, lwd=1)
+#lines(1:5+.05, kd08.50,  type='b', lty=3, pch=6, lwd=1)
+#lines(1:5-.05, kd08.188, type='b', lty=3, pch=5, lwd=1)
+#lines(1:4-.05, n95,      type='b', lty=3, pch=0, lwd=1)
+
+legend("topright", c('AMT (n=2, N=100)', 'AMT (n=4, N=92)', 'AMT (n=8, N=104)'), 
+       bty='n', pch=c(4,4,4,1,2,3,6,5,0),
+       col=c("#e74c3c","orange","#4575b4","black","black","black","black","black","black"), ncol=2)
+```
+
+
 We add the results from other studies
 ```{r}
 chess = c(32.15, 25.7)
@@ -145,14 +185,14 @@ b2 = c(1,0,0,0,0,0)
 b4 = c(1,0,0,0,1,0)
 b8 = c(1,0,0,0,0,1)
 
-b2.est = t(b2)%*%coef(M1)
-b2.se  = sqrt(t(b2)%*%vcov(M1)%*%b2)
+b2.est = t(b2)%*%coef(M2)
+b2.se  = sqrt(t(b2)%*%vcov(M2)%*%b2)
 
-b4.est = t(b4)%*%coef(M1)
-b4.se  = sqrt(t(b4)%*%vcov(M1)%*%b4)
+b4.est = t(b4)%*%coef(M2)
+b4.se  = sqrt(t(b4)%*%vcov(M2)%*%b4)
 
-b8.est = t(b8)%*%coef(M1)
-b8.se  = sqrt(t(b8)%*%vcov(M1)%*%b8)
+b8.est = t(b8)%*%coef(M2)
+b8.se  = sqrt(t(b8)%*%vcov(M2)%*%b8)
 
 suppressWarnings({tmp = rbind(b2.est+1.96*c(-b2.se,b2.se), b4.est+1.96*c(-b4.se,b4.se), b8.est+1.96*c(-b8.se,b8.se))})
 rownames(tmp) = c(2,4,8)
@@ -181,8 +221,7 @@ Finally we plot the results of the AMT experiments against the previous studies.
 ```{r}
 tmp1 = expand.grid(size=as.factor(c(2,4,8)),round=1:4)
 tmp1$round2 = tmp1$round^2
-pred = predict(M1,newdata = tmp1, se.fit = TRUE)
-
+pred = predict(M2,newdata = tmp1, se.fit = TRUE)
 
 tmp = aggregate(avg ~ size+round, mean, data=amt[amt$round<5,])
 tmp$fit = pred$fit

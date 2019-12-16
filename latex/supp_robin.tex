@@ -70,22 +70,55 @@ Figure \ref{Fig S7} shows the dynamics of guesses round by round in such a way t
 \section{Learning rates}
 Before fitting a linear regression model to the averages of our groups from MTurk, which will give us an idea of the learning rates of the groups, we need to make sure that the data can be modelled into a Gaussian framework.\footnote{We find that the Nagel data \cite{Nagel95} is not easily fitted in a Gaussian framework. We have tried both the raw average and the log (corresponding to a log-normal model). Therefore we only used the raw averages without confidence intervals in figure \ref{fig:means}.} Looking at the raw avarages for all eight rounds in figure \ref{fig:means} we see some non-linear relationships in the last rounds. To model the averages as a function of group size we therefore use a gaussian general linear model (GLM) \cite{Rcoreteam} with a quadratic interaction term:
 
-\begin{align*}
-Y_{ij} &\sim Gaussian(\mu_{ij}) \\
+\begin{equation}
+\begin{split}
+Y_{ij} &\sim Gaussian(\mu_{ij})  \\
 \mathbf{E}(Y_{ij}) &= \mu_{ij}  = g^{-1}(X\beta) \\
-g(\mu_{ij}) &= (round + round^2) \, \times \, size \\
-\alpha &\sim \mathcal{N}(\mu,\,\sigma^{2})\,.
-\end{align*}
+g(\mu_{ij}) &= \eta_{ij} = (round + round^2) \, \times \, size  \\
+\alpha &= 1 \sim \mathcal{N}(\mu,\,\sigma^{2})\,.
+\label{eq:glm}
+\end{split}
+\end{equation}
 
-where $Y_i$ are the averages for each round $i \in {1,..., 8}$  and each group $j \in {2,4,8}$
+where the $Y_i$'s are the averages for each round $i \in {1,..., 8}$ and each group $j \in {2,4,8}$, $\mathbf{E}(Y_{ij})$ is the expected value, $g(\mu_{ij})$ is the link function providing the relationship between the linear predictor and the mean of the distribution function, and
 $\alpha_i$ is the random intercept, which is assumed to be normally distributed with mean $0$ and variance $\sigma^2$. 
-
 
 To validate the model we plot its standardized residuals against the theoretical quartiles in figure \ref{fig:qq}, which show a very good fit with normally distributed residuals. Tails are obviously not captured all that well, but this is not to be expected. Besided, the linear regression model is quite robust to some degree of deviation from the assumption of normally distributed residuals. In addition, the majority in the middle values are captured near perfectly, hence we cannot reasonably discard the linear regression model.
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width=1\textwidth]{../plots/qq.pdf}\caption{QQ plot showing normally distributed standardized residuals.}
 \label{fig:qq}
 \end{figure}
+
+Model outputs of the full model according to equation \eqref{eq:glm} are shown in the first column of Table \ref{tab:1}. 
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{l c c c }
+\hline
+ & Full model & First 4 rounds & No quad term   \\
+\hline
+$round$                  & $-2.828 \; (.826)^{***}$  & $-6.880 \; (2.717)^{*}$   & $-3.319 \; (.478)^{***}$  \\
+$round^2$                  & $.001 \; (.090)$          & $.712 \; (.535)$          &                           \\
+as.factor(size)2        & $52.821 \; (1.620)^{***}$ & $57.310 \; (2.978)^{***}$ & $53.749 \; (1.310)^{***}$ \\
+as.factor(size)4        & $52.336 \; (1.689)^{***}$ & $49.209 \; (3.105)^{***}$ & $51.706 \; (1.366)^{***}$ \\
+as.factor(size)8        & $56.500 \; (1.589)^{***}$ & $51.079 \; (2.920)^{***}$ & $52.690 \; (1.285)^{***}$ \\
+$round$:as.factor(size)4  & $-3.816 \; (1.193)^{**}$  & $3.665 \; (3.925)$        & $-2.392 \; (.691)^{***}$  \\
+$round$:as.factor(size)8  & $-6.927 \; (1.157)^{***}$ & $2.148 \; (3.805)$        & $-3.024 \; (.670)^{***}$  \\
+$round^2$:as.factor(size)4 & $.245 \; (.129)$          & $-1.212 \; (.773)$        &                           \\
+$round^2$:as.factor(size)8 & $.579 \; (.125)^{***}$    & $-1.034 \; (.749)$        &                           \\
+\hline
+AIC                     & 18344.270                 & 8983.404                  & 8980.375                  \\
+BIC                     & 18401.968                 & 9034.171                  & 9015.911                  \\
+Log Likelihood          & -9162.135                 & -4481.702                 & -4483.187                 \\
+Deviance                & 318129.424                & 134486.544                & 134824.388                \\
+Num. obs.               & 2368                      & 1184                      & 1184                      \\
+\hline
+\multicolumn{4}{l}{\scriptsize{$^{***}p<0.001$, $^{**}p<0.01$, $^*p<0.05$}}
+\end{tabular}
+\caption{Comparison of general linear models. ``Full model'' shows the result of the model in equation \eqref{eq:glm} for all eight rounds. ``First 4 rounds'' shows the result of the same model, but only using the first four rounds, and ``No quad term'' shows the result with the first four rounds when the quadratic term is removed. }
+\label{tab:1}
+\end{center}
+\end{table}
 
 
