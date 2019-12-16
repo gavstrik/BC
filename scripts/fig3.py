@@ -107,4 +107,5 @@ def plot_round_by_round_means(df_all, Nagel_avgs):
 df = pd.DataFrame(AMTdata)
 df_95 = pd.DataFrame(Nagel95)
 Nagel_avgs = [df_95['round 1'].mean(), df_95['round 2'].mean(), df_95['round 3'].mean(), df_95['round 4'].mean()]
+print(Nagel_avgs)
 plot_round_by_round_means(df, Nagel_avgs)

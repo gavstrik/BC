@@ -1,0 +1,263 @@
+---
+title: "Beauty contest - Analysis of data"
+author: "Jacob Østergaard and Robin Engelhardt"
+date: "December 11rd 2019"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='plots/',
+                      echo=TRUE, warning=FALSE, message=FALSE, comment="")
+clean_up <- function(...){
+  for(i in dev.list()) dev.off(which=i)
+  keep = as.list(match.call())
+  rm(list=setdiff(ls(envir = .GlobalEnv), keep), envir = .GlobalEnv)
+  # assign("savePDF", FALSE, envir = .GlobalEnv)
+  assign("icloud", "~/Library/Mobile Documents/com~apple~CloudDocs/", envir = .GlobalEnv)
+  cat("\014")  # Clear console
+}
+setwd("~/Papers/Game of Regret/GoR_github/BC/")
+
+# usefull functions
+add.alpha <- function(col, alpha=1){
+  if(missing(col))
+    stop("Please provide a vector of colours.")
+  apply(sapply(col, col2rgb)/255, 2,
+        function(x)
+          rgb(x[1], x[2], x[3], alpha=alpha))
+}
+```
+
+
+A short analysis of data from Amazon Mechanical Turk experiments on the *beauty contest* or *guess 2/3 of the average*.
+
+First data (.csv files) is loaded
+```{r}
+amt <- read.csv("~/Papers/Game of Regret/GoR_github/BC/data/amt.csv")
+nagel <- read.csv("~/Papers/Game of Regret/GoR_github/BC/data/Nagel95.csv")
+head(amt)
+head(nagel)
+```
+
+The Nagel data must be prepped for analysis, hence we change the format.
+```{r}
+
+tmp1 = nagel[,1:2]
+tmp1$round = 1
+tmp1$avg = nagel$round.1
+
+tmp2 = nagel[,1:2]
+tmp2$round = 2
+tmp2$avg = nagel$round.2
+
+tmp3 = nagel[,1:2]
+tmp3$round = 3
+tmp3$avg = nagel$round.3
+
+tmp4 = nagel[,1:2]
+tmp4$round = 4
+tmp4$avg = nagel$round.4
+
+nagel = rbind(tmp1,tmp2,tmp3,tmp4)
+
+head(nagel)
+```
+
+We add some variables, namely the quadratic term $round^2$ and $size$ (size of each group). For the Amazon data, we model the average rather than the 2/3's response.
+```{r}
+amt$round2 = amt$round^2
+amt$size = as.numeric(substr(amt$name,5,5))
+amt$avg = amt$twothirds*3/2
+
+nagel$round2 = nagel$round^2
+nagel$size = NA
+for(i in 4:7){
+  for(j in 1:4){
+    nagel[nagel$session==i & nagel$round==j,]$size = max(nagel[nagel$session==i & nagel$round==j,]$id)
+  }
+}
+
+nagel
+```
+
+We find that the Nagel data is not easily fitted in a Gaussian framework. We've tried both the raw average and the log (corresponding to a log-normal model). Neither fits very well... Here the log-normal is presented.
+```{r}
+M = glm(log(avg) ~ as.factor(round)-1, data=nagel)
+
+res = resid(M)
+res = (res-mean(res))/sd(res)
+qqnorm(res); abline(0,1, col='red')
+```
+
+The Amazon data fits much better, here the average is modeled in a linear regression model, with normally distributed residuals. Fit looks very good. Tails are obviously not captured all that well, but this is not to be expected. Besided, the linear regression model is quite robust to some degree of deviation from the assumption of normally distributed residuals. In addition, the majority of the midle is captured near perfectly, hence we cannot reasonably discard the linear regression model.
+```{r}
+M0 = glm(avg ~ (round+round2)*as.factor(size)-1, data=amt)
+
+res = rstandard(M0)
+#res = resid(M0, type='pearson')
+#res = (res-mean(res))/sd(res)
+pdf("qq.pdf")
+qqnorm(res); abline(0,1, col='red')
+dev.off()
+```
+
+
+
+
+
+We see that almost all coeffiencts are highly significant. The `round2` is insignificant, hence the groups of only 2 players does not exhibit any quadratic form. The interaction between `round2` and groups of 4 is a borderline case, indicating that there might not be any quadratic relationship in this group either. However, the rest of the parameters are highly significant, indicating that (at least) a quadratic term is necessary for the groups of 8 players to describe the evolution of the group average over the course of 8 rounds.
+```{r}
+summary(M0)
+```
+However, we will only compare the regression model to 4 rounds from other studies, hence we refit the model using only the first 4 rounds. The fit is still very good.
+```{r}
+M0 = glm(avg ~ (round+round2)*as.factor(size)-1, data=amt[amt$round<5,])
+
+res = resid(M0)
+res = (res-mean(res))/sd(res)
+qqnorm(res); abline(0,1, col='red')
+```
+Besides, the quadratic term seems insignificant for the first 4 rounds.
+```{r}
+summary(M0)
+```
+A likelihood ratio test show that we can indeed remove the quadratic trend.
+```{r}
+M1 = glm(avg ~ round*as.factor(size)-1, data=amt[amt$round<5,])
+anova(M0,M1, test='LRT')
+```
+We find that all terms are now significant, and adapt `M1` as the final model.
+```{r}
+summary(M1)
+```
+We add the results from other studies
+```{r}
+chess = c(32.15, 25.7)
+w03 = c(24.6, 16.4, 6.7, 6.2, 12.1, 5.4, 9.6, 11.2, 8.4, 6.5)
+kd08.14 = c(35.3,21.5, 17.1, 14.0, 13.4)
+kd08.50 = c(35.7, 25.1, 15.9, 12.2, 12.9)
+kd08.188 = c(30.0, 21.9, 15.7, 13.6, 10.8)
+n95 = aggregate(avg ~ round, data=nagel, mean)$avg
+```
+To compare rates of learning directly, we extract the $\beta_2,\beta_4$ and $\beta_4$ estimates along with their standard deviations, based on model `M1` and calculate the $95\%$ confidence intervals for the slope parameters for each group.
+```{r}
+b2 = c(1,0,0,0,0,0) 
+b4 = c(1,0,0,0,1,0)
+b8 = c(1,0,0,0,0,1)
+
+b2.est = t(b2)%*%coef(M1)
+b2.se  = sqrt(t(b2)%*%vcov(M1)%*%b2)
+
+b4.est = t(b4)%*%coef(M1)
+b4.se  = sqrt(t(b4)%*%vcov(M1)%*%b4)
+
+b8.est = t(b8)%*%coef(M1)
+b8.se  = sqrt(t(b8)%*%vcov(M1)%*%b8)
+
+suppressWarnings({tmp = rbind(b2.est+1.96*c(-b2.se,b2.se), b4.est+1.96*c(-b4.se,b4.se), b8.est+1.96*c(-b8.se,b8.se))})
+rownames(tmp) = c(2,4,8)
+colnames(tmp) = c("lo","hi")
+```
+We use a least squares fit for the other studies (discarding any uncertainty on these), these are simply the "optimal" straight lines throught the reported round averages. The extract the slope coefficients ($\beta$'s) only.
+```{r}
+tmp2 = c(coef(lm(chess ~ c(1,2)))[2],
+         coef(lm(w03[1:4] ~ c(1:4)))[2],
+         coef(lm(kd08.14[1:4] ~ c(1:4)))[2],
+         coef(lm(kd08.50[1:4] ~ c(1:4)))[2],
+         coef(lm(kd08.188[1:4] ~ c(1:4)))[2],
+         coef(lm(n95[1:4] ~ c(1:4)))[2])
+names(tmp2) <- c("chess", "w03","kd08.14","kd08.50","kd08.188","n95")
+```
+Copmaring the $\beta$'s from previous experiments with the AMT data, we find that only the `kd08.50` and `n95` are quite different from all AMT groups. The rest are within the limits of the AMT groups of 4 and 8 respectively. The `kd08.50` is slightly different from the groups of 4 players, but just beyond the confidence bounds. And even though the reported $\beta$'s from the the other studies does not have confidence bounds, some uncertainty is to be expected here. Taking the AMT standard deviations as a proxy, the intervals are roughly $\approx\beta\pm1$, hence the `kd08.50` can be reasonably expected to overlap the confidence interval of $\beta_2$.
+```{r}
+print(tmp2)
+print(tmp)
+```
+Hence, we can conclude that the rate of learning is quite similar for most studies, and coincide with the findings of AMT groups of 4 and 8 players. The AMT groups of only 2 players is significantly different from everything else, including AMT groups of 4,8 players. This indicates a significantly lower learning rate (interval is higher than the other groups).
+
+
+Finally we plot the results of the AMT experiments against the previous studies. Note that the regression model is only fitted to the first 4 rounds, hence the regression lines and $95\%$ confidence intervals are only plotted for rounds 1-4. As mentioned above, a quadratic terms is necessary to extrapolate these (especially for the groups of 8's) to round 8 (and further).
+
+```{r}
+tmp1 = expand.grid(size=as.factor(c(2,4,8)),round=1:4)
+tmp1$round2 = tmp1$round^2
+pred = predict(M1,newdata = tmp1, se.fit = TRUE)
+
+
+tmp = aggregate(avg ~ size+round, mean, data=amt[amt$round<5,])
+tmp$fit = pred$fit
+tmp$fit.lo = pred$fit-1.96*pred$se.fit
+tmp$fit.hi = pred$fit+1.96*pred$se.fit
+
+plot(0,0, type='n', xlim=c(1,8), ylim=c(0,60), bty='n', xlab="round",ylab="average")
+plot1 <- function(size, col){
+  # size=2;col='red'
+  tmp2 = tmp[tmp$size==size,]
+  polygon(c(.95,2,3,4.05,4.05,3,2,.95), c(tmp2$fit.lo, rev(tmp2$fit.hi)), border=NA, col=add.alpha(col,.25))
+  lines(1:4, tmp2$fit, col=add.alpha(col,.85), lwd=2)
+  lines(1:4, tmp2$avg, col=add.alpha(col,.95), lwd=2, 'p', pch=4)
+}
+
+tmp3 = aggregate(avg ~ size+round, mean, data=amt[amt$round>3,])
+lines(4:8,tmp3[tmp3$size==2,]$avg, type='b',lty=3,pch=4, lwd=2, col=add.alpha('#e74c3c',.85))
+lines(4:8,tmp3[tmp3$size==4,]$avg, type='b',lty=3,pch=4, lwd=2, col=add.alpha('orange',.85))
+lines(4:8,tmp3[tmp3$size==8,]$avg, type='b',lty=3,pch=4, lwd=2, col=add.alpha('#4575b4',.85))
+
+plot1(2, '#e74c3c')
+plot1(4, 'orange')
+plot1(8, '#4575b4')
+
+lines(1:2, chess,    type='b', lty=3, pch=1, lwd=1)
+lines(1:10, w03,     type='b', lty=3, pch=2, lwd=1)
+lines(1:5, kd08.14,  type='b', lty=3, pch=3, lwd=1)
+lines(1:5+.05, kd08.50,  type='b', lty=3, pch=6, lwd=1)
+lines(1:5-.05, kd08.188, type='b', lty=3, pch=5, lwd=1)
+lines(1:4-.05, n95,      type='b', lty=3, pch=0, lwd=1)
+
+legend("topright", c('AMT (n=2, N=100)', 'AMT (n=4, N=92)', 'AMT (n=8, N=104)', 
+                      'BF10 (chess players, n=13-897, N=2481)',
+                     'W03 (students, n=8-10, N=26)',
+                     'KD08 (students, N=14)', 
+                     'KD08 (students, N=50)',
+                     'KD08 (students, N=188)',
+                     'N95 (students, n=15, N=64)'), bty='n', pch=c(4,4,4,1,2,3,6,5,0), col=c("#e74c3c","orange","#4575b4","black","black","black","black","black","black"), ncol=2)
+
+
+```
+
+```{r}
+pdf("plots/fig3_new.pdf", width = 15, height = 10)
+  plot(0,0, type='n', xlim=c(1,8), ylim=c(0,60), bty='n', xlab="Round",ylab="Mean", cex.axis=1.5, cex.lab=2)
+  plot1 <- function(size, col){
+    # size=2;col='red'
+    tmp2 = tmp[tmp$size==size,]
+    polygon(c(.95,2,3,4.05,4.05,3,2,.95), c(tmp2$fit.lo, rev(tmp2$fit.hi)), border=NA, col=add.alpha(col,.25))
+    lines(1:4, tmp2$fit, col=add.alpha(col,.85), lwd=4)
+    lines(1:4, tmp2$avg, col=add.alpha(col,.95), lwd=4, 'p', pch=4, cex=2)
+  }
+  
+  tmp3 = aggregate(avg ~ size+round, mean, data=amt[amt$round>3,])
+  lines(4:8,tmp3[tmp3$size==2,]$avg, type='b',lty=3,pch=4, lwd=4, col=add.alpha('#e74c3c',.85), cex=2)
+  lines(4:8,tmp3[tmp3$size==4,]$avg, type='b',lty=3,pch=4, lwd=4, col=add.alpha('orange',.85), cex=2)
+  lines(4:8,tmp3[tmp3$size==8,]$avg, type='b',lty=3,pch=4, lwd=4, col=add.alpha('#4575b4',.85), cex=2)
+  
+  plot1(2, '#e74c3c')
+  plot1(4, 'orange')
+  plot1(8, '#4575b4')
+  
+  lines(1:2, chess,    type='b', lty=3, pch=1, lwd=2, cex=2)
+  lines(1:10, w03,     type='b', lty=3, pch=2, lwd=2, cex=2)
+  lines(1:5, kd08.14,  type='b', lty=3, pch=3, lwd=2, cex=2)
+  lines(1:5+.05, kd08.50,  type='b', lty=3, pch=6, lwd=2, cex=2)
+  lines(1:5-.05, kd08.188, type='b', lty=3, pch=5, lwd=2, cex=2)
+  lines(1:4-.05, n95,      type='b', lty=3, pch=0, lwd=2, cex=2)
+  
+  legend("topright", c('AMT (n=2, N=100)', 'AMT (n=4, N=92)', 'AMT (n=8, N=104)', 
+                       'BF10 (chess players, n=13-897, N=2481)',
+                       'W03 (students, n=8-10, N=26)',
+                       'KD08 (students, N=14)', 
+                       'KD08 (students, N=50)',
+                       'KD08 (students, N=188)',
+                       'N95 (students, n=15, N=64)'), bty='n', pch=c(4,4,4,1,2,3,6,5,0), col=c("#e74c3c","orange","#4575b4","black","black","black","black","black","black"), ncol=2, cex=1.5)
+dev.off()  
+citation()
