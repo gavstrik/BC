@@ -134,39 +134,30 @@ tmp1$round2 = tmp1$round^2
 pred = predict(M0, newdata = tmp1, se.fit = TRUE)
 
 tmp = aggregate(avg ~ size+round, mean, data=amt)
-# tmp = aggregate(avg ~ (round+round2)*as.factor(size)-1, data=amt)
 tmp$fit = pred$fit
 tmp$fit.lo = pred$fit-1.96*pred$se.fit
 tmp$fit.hi = pred$fit+1.96*pred$se.fit
 
-plot(0,0, type='n', xlim=c(1,8), ylim=c(0,60), bty='n', xlab="round",ylab="average")
+pdf("plots/fig3_full.pdf", width = 15, height = 10)
+plot(0,0, type='n', xlim=c(1,8), ylim=c(0,60), bty='n', xlab="Round",ylab="Mean", cex.axis=1.5, cex.lab=2)
 plot1 <- function(size, col){
-  # size=2;col='red'
   tmp2 = tmp[tmp$size==size,]
-  polygon(c(.95,2,3,4.05,4.05,3,2,.95), c(tmp2$fit.lo, rev(tmp2$fit.hi)), border=NA, col=add.alpha(col,.25))
-  # lines(1:4, tmp2$fit, col=add.alpha(col,.85), lwd=2)
-  # lines(1:4, tmp2$avg, col=add.alpha(col,.95), lwd=2, 'p', pch=4)
+  polygon(c(.95,2:7,8.05,8.05,7:2,.95), c(tmp2$fit.lo, rev(tmp2$fit.hi)), border=NA, col=add.alpha(col,.25))
+  lines(1:8, tmp2$fit, col=add.alpha(col,.85), lwd=4)
+  lines(1:8, tmp2$avg, col=add.alpha(col,.95), lwd=4, 'p', pch=4, cex=2)
 }
-
-#tmp3 = aggregate(avg ~ size+round, mean, data=amt[amt$round>3,])
-#lines(4:8,tmp3[tmp3$size==2,]$avg, type='b',lty=3,pch=4, lwd=2, col=add.alpha('#e74c3c',.85))
-#lines(4:8,tmp3[tmp3$size==4,]$avg, type='b',lty=3,pch=4, lwd=2, col=add.alpha('orange',.85))
-#lines(4:8,tmp3[tmp3$size==8,]$avg, type='b',lty=3,pch=4, lwd=2, col=add.alpha('#4575b4',.85))
 
 plot1(2, '#e74c3c')
 plot1(4, 'orange')
 plot1(8, '#4575b4')
 
-#lines(1:2, chess,    type='b', lty=3, pch=1, lwd=1)
-#lines(1:10, w03,     type='b', lty=3, pch=2, lwd=1)
-#lines(1:5, kd08.14,  type='b', lty=3, pch=3, lwd=1)
-#lines(1:5+.05, kd08.50,  type='b', lty=3, pch=6, lwd=1)
-#lines(1:5-.05, kd08.188, type='b', lty=3, pch=5, lwd=1)
-#lines(1:4-.05, n95,      type='b', lty=3, pch=0, lwd=1)
-
-legend("topright", c('AMT (n=2, N=100)', 'AMT (n=4, N=92)', 'AMT (n=8, N=104)'), 
-       bty='n', pch=c(4,4,4,1,2,3,6,5,0),
-       col=c("#e74c3c","orange","#4575b4","black","black","black","black","black","black"), ncol=2)
+legend("topright", 
+       c('AMT (n=2, N=100)', 'AMT (n=4, N=92)', 'AMT (n=8, N=104)'), 
+         bty='n', 
+         pch=c(4,4,4), 
+         col=c("#e74c3c","orange","#4575b4"), 
+         cex=1.5)
+dev.off() 
 ```
 
 

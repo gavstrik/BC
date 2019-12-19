@@ -2,9 +2,11 @@
 %\maketitle
 
 \section{Materials and Method}
+\noindent
 Amazon Mechanical Turk (MTurk) is an online labor market and crowdsourcing platform, which is increasingly being used for social and economic experiments in order to investigate the real time interactions of small to medium sized groups. MTurk has repeatedly been shown to meet or exceed the standards set by data collection methods using other means \citep{berinsky_huber_lenz_2012, BuhrmesterEtAl18}. The platform has a large participant pool (called participants), various demographic and quality selection options for researchers, and provides an integrated participant compensation system.
 
 \section{Experimental Design}
+\noindent
 After participants accept our ‘HIT’ (‘human intelligence task’), they have to provide informed consent, see Figure \ref{Fig S1}. Then they wait until there are enough participants who have accepted the HIT to form random groups (grouped by arrival) of size 2, 4 or 8, respectively, depending on the treatment condition. When group has been formed, instructions are displayed for 90 seconds, see Figure \ref{Fig S2}. After pressing NEXT, participants see a page where they have to enter into a form field an integer number between 0 and 100. When all participants in a group have done so, a result page is displayed, see Figure \ref{Fig S3}, where they can see their own guess, the guesses of the other players, the average and the 2/3 of the average as well as information about whether they have won a bonus in the current found and what their total payoff is for the time being. After this, the previous steps are repeated for a total of 8 rounds. Every time participants enter a new number, they can see a list of the 2/3 of the average of the previous rounds as shown in Figure \ref{Fig S4}. participants have 90 seconds to think about a number. After eight rounds, participants are required to give feedback by answering the question: ‘What strategy did you use while playing this game?’, after which they are thanked for their participation.
 
 \begin{figure}
@@ -28,18 +30,21 @@ After participants accept our ‘HIT’ (‘human intelligence task’), they ha
 \end{figure}
 
 \section{MTurk Setting}
+\noindent
 When working with MTurk it is important to consider the right settings in order to get the best data quality possible \citep{ChandlerShapiro16}. Fair wage, attrition rates, removal of duplicate participants and informative feedback are some of the most important issues to address.
 
-Average wage for participants in our experiments was approximately \$15 per hour, which is considered generous according to MTurk guidelines and certainly above the estimated average of \$6 per hour when excluding un-submitted and rejected work \citep{HaraEtAl18}. 
+Average wage for participants in our experiments was approximately \$15 per hour, which is considered generous according to MTurk guidelines and certainly above the estimated average of \$6 per hour when excluding unsubmitted and rejected work \citep{HaraEtAl18}. 
 
 Quitting a study before completing it is prevalent on MTurk, and varies systemically across experimental conditions. Our overall attrition rate was 24\%, which is considered normal \citep{ZhouFishbach16}. The main reason, we believe, was either a player not being able to enter a number within the allotted time, or – more likely – due to a player not bothering to wait for the others to make their guess and therefore quitting prematurely. This was very detrimental for the rest of the group and for the experiment as such, because it meant that the rest of the group would continue the game with one player less, making the whole process much slower and skewing the results. If somebody had quit, we still let the other players finish their game and paid them for their efforts, but we decided to remove those groups from the data analysis. Out of a total of 114 initial groups, 27 groups were thus removed from the final data set, giving an overall attrition rate of 24\%.
 
-All participants automatically received a unique qualification when accepting a HIT, ensuring that they could not play the game twice. In addition, we set the qualification that participants should have completed at least 50 HITs and have an accepted HIT rate of 90\% or above. This is slightly below what is considered to be a good cut off (normally researchers recomment above several hundred completed HITs and an acceptance rate of 96\%), but we decided to give less experiences players a chance in order to not be too selective of participant experience, but 90\% still ensured that we would get somewhat experienced and qualified participants. During our experiments, participants had easy access to our email for questions and possible bug reports. 
+All participants automatically received a unique qualification when accepting a HIT, ensuring that they could not play the game twice. In addition, we set the qualification that participants should have completed at least 50 HIT's and have an accepted HIT rate of 90\% or above. This is slightly below what is considered to be a good cut off point (normally researchers recommend above several hundred completed HIT's and an acceptance rate of 96\%), but we decided to give less experiences players a chance in order not to risk recruiting only those participants who have played this or a similar game before. A 90\% hit rate still ensured that we would get somewhat experienced and qualified participants. During our experiments, participants had also easy access to our email for questions and possible bug reports. 
 
 \section{Code and Software}
-All experiments are coded in the experimental software oTree 1.4.39 \citep{ChenSchongerWickens16} which is based on Python and Django. The code for the data analysis done is available on Github at https://github.com/gavstrik/game-of-regret.
+\noindent
+All experiments are coded in the experimental software oTree 1.4.39 \citep{ChenSchongerWickens16} which is based on Python and Django. The code for the data analysis done is available on Github at https://github.com/gavstrik/BC.
 
 \section{Data Collection and Distribution}
+\noindent
 After removing defunct groups, we obtained a total of 2368 guesses from 296 unique participants who played the classic iterated beauty contest game in 50 groups of size 2, 23 groups of size 4, and 13 groups of size 8.
 
 \begin{figure}
@@ -47,10 +52,10 @@ After removing defunct groups, we obtained a total of 2368 guesses from 296 uniq
 \label{Fig S5}
 \end{figure}
 
-Figure \ref{Fig S5} shows the guesses for all eight rounds, partitioned into their respective groups. As can be seen from the histograms, guesses move slowly towards lower numbers in subsequent rounds, with the 2-players groups (in blue) lacking slightly behind the other groups. There are many spikes in the plots, but there is no discernable pattern that would suggest dominant spikes at those positions corresponding to iterated best response strategies (33, 22, etc...).
+Figure \ref{Fig S5} shows the guesses for all eight rounds, partitioned into their respective groups. As can be seen from the histograms, guesses move slowly towards lower numbers in subsequent rounds, with the 2-players groups (in blue) lacking slightly behind the other groups. There are many spikes in the plots, but there is no discernible pattern that would suggest dominant spikes at those positions corresponding to iterated best response strategies (33, 22, etc...).
 
-\section{Guess Dynamics}
-As noted in figure 4 in the main text, players often choose numbers greater than 2/3 of the mean of the previous round. Less than 2\% of all players on MTurk never go above 2/3 of the previous mean, while 53\% go above this target more than four times. 
+%\section{Guess Dynamics}
+%As noted in figure 4 in the main text, players often choose numbers greater than 2/3 of the mean of the previous round. Less than 2\% of all players on MTurk never go above 2/3 of the previous mean, while 53\% go above this target more than four times. 
 
 %Figure \ref{Fig S6} shows some examples of the up and down movements of individual guesses from one round to the next. It is difficult to interpret this behavior observed in Fig. S6 as simple directional learning. Instead, players seem to try to “talk” with each other with occasional high guesses, and instead of adapting to the new target (explicitly shown as 2/3 of the previous mean), they may adapt to what they think the other players will guess in the next round.
 %
@@ -60,53 +65,50 @@ As noted in figure 4 in the main text, players often choose numbers greater than
 %\end{figure}
 %
 %We can illustrate the guess-dynamics in another way as well. 
-Figure \ref{Fig S7} shows the dynamics of guesses round by round in such a way that the previous round n is always shown on the x-axis and the next round $n+1$ is always shown on the y-axis. The diagonal black line corresponds to staying at the same guess in subsequent rounds. Lines connecting the dots in Figure \ref{Fig S7} then indicate the sequence of guesses by the same player, whose comments are shown in the legend. The total bonus earned is shown in parenthesis.
+%Figure \ref{Fig S7} shows the dynamics of guesses round by round in such a way that the previous round n is always shown on the x-axis and the next round $n+1$ is always shown on the y-axis. The diagonal black line corresponds to staying at the same guess in subsequent rounds. Lines connecting the dots in Figure \ref{Fig S7} then indicate the sequence of guesses by the same player, whose comments are shown in the legend. The total bonus earned is shown in parenthesis.
 
-\begin{figure}
-\includegraphics[width=1\textwidth]{../plots/figA7.pdf}\caption{Dynamics of guesses round by round.}
-\label{Fig S7}
-\end{figure}
+%\begin{figure}
+%\includegraphics[width=1\textwidth]{../plots/figA7.pdf}\caption{Dynamics of guesses round by round.}
+%\label{Fig S7}
+%\end{figure}
 
 \section{Learning rates}
-Before fitting a linear regression model to the averages of our groups from MTurk, which will give us an idea of the learning rates of the groups, we need to make sure that the data can be modelled into a Gaussian framework.\footnote{We find that the Nagel data \cite{Nagel95} is not easily fitted in a Gaussian framework. We have tried both the raw average and the log (corresponding to a log-normal model). Therefore we only used the raw averages without confidence intervals in figure \ref{fig:means}.} Looking at the raw avarages for all eight rounds in figure \ref{fig:means} we see some non-linear relationships in the last rounds. To model the averages as a function of group size we therefore use a gaussian general linear model (GLM) \cite{Rcoreteam} with a quadratic interaction term:
-
+\noindent
+Based on the observes averages in figure \ref{fig:means} in the main text, we model the averages as a function of rounds and group sizes with a multiple linear regression model containing a quadratic interaction term in the link function, 
 \begin{equation}
-\begin{split}
-Y_{ij} &\sim Gaussian(\mu_{ij})  \\
-\mathbf{E}(Y_{ij}) &= \mu_{ij}  = g^{-1}(X\beta) \\
-g(\mu_{ij}) &= \eta_{ij} = (round + round^2) \, \times \, size  \\
-\alpha &= 1 \sim \mathcal{N}(\mu,\,\sigma^{2})\,.
-\label{eq:glm}
-\end{split}
+\mu_{j} =  \alpha_j + \beta_{1j}n + \beta_{2j}n^2 ,
+\label{eq:link}
 \end{equation}
 
-where the $Y_i$'s are the averages for each round $i \in {1,..., 8}$ and each group $j \in {2,4,8}$, $\mathbf{E}(Y_{ij})$ is the expected value, $g(\mu_{ij})$ is the link function providing the relationship between the linear predictor and the mean of the distribution function, and
-$\alpha_i$ is the random intercept, which is assumed to be normally distributed with mean $0$ and variance $\sigma^2$. 
+\noindent
+where $\mu_{j}$ is the mean of group $j \in \{2,4,8\}$, $n$ is the round number, $\beta_{1}$ and  $\beta_{2}$ are the slope coefficients for each interaction, and $\alpha$ is a random intercept, which is assumed to be normally distributed with mean $0$ and variance $\sigma^2$. 
 
-To validate the model we plot its standardized residuals against the theoretical quartiles in figure \ref{fig:qq}, which show a very good fit with normally distributed residuals. Tails are obviously not captured all that well, but this is not to be expected. Besided, the linear regression model is quite robust to some degree of deviation from the assumption of normally distributed residuals. In addition, the majority in the middle values are captured near perfectly, hence we cannot reasonably discard the linear regression model.
+To validate the model we plot its standardized residuals against the theoretical quartiles in figure \ref{fig:qq}, which show a very good fit with normally distributed residuals. Tails are obviously not captured all that well, but this is not to be expected. Besides, the linear regression model is quite robust to some degree of deviation from the assumption of normally distributed residuals. In addition, the majority in the middle values are captured near perfectly, hence we cannot reasonably discard the linear regression model.
 
-\begin{figure}[h]
-\includegraphics[width=1\textwidth]{../plots/qq.pdf}\caption{QQ plot showing normally distributed standardized residuals.}
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=.5\textwidth]{../plots/qq.pdf}\caption{QQ plot showing normally distributed standardized residuals.}
 \label{fig:qq}
+\end{center}
 \end{figure}
 
-Model outputs of the full model according to equation \eqref{eq:glm} are shown in the first column of Table \ref{tab:1}. 
+Model outputs of the full model according to equation \eqref{eq:link} are shown in the first column of Table \ref{tab:2}. We see that almost all coefficients are highly significant. The $round^2$ is insignificant, hence the groups of only two players does not exhibit any quadratic form. The interaction between $round^2$ and groups of four is a borderline case, indicating that there might not be any quadratic relationship in this group either. However, the rest of the parameters are highly significant, indicating that (at least) a quadratic term is necessary for the groups of eight players to describe the evolution of the group average over the course of 8 rounds.
 
 \begin{table}[h]
 \begin{center}
 \begin{tabular}{l c c c }
 \hline
- & Full model & First 4 rounds & No quad term   \\
+ & Full model & First 4 rounds & Final model   \\
 \hline
-$round$                  & $-2.828 \; (.826)^{***}$  & $-6.880 \; (2.717)^{*}$   & $-3.319 \; (.478)^{***}$  \\
-$round^2$                  & $.001 \; (.090)$          & $.712 \; (.535)$          &                           \\
-as.factor(size)2        & $52.821 \; (1.620)^{***}$ & $57.310 \; (2.978)^{***}$ & $53.749 \; (1.310)^{***}$ \\
-as.factor(size)4        & $52.336 \; (1.689)^{***}$ & $49.209 \; (3.105)^{***}$ & $51.706 \; (1.366)^{***}$ \\
-as.factor(size)8        & $56.500 \; (1.589)^{***}$ & $51.079 \; (2.920)^{***}$ & $52.690 \; (1.285)^{***}$ \\
-$round$:as.factor(size)4  & $-3.816 \; (1.193)^{**}$  & $3.665 \; (3.925)$        & $-2.392 \; (.691)^{***}$  \\
-$round$:as.factor(size)8  & $-6.927 \; (1.157)^{***}$ & $2.148 \; (3.805)$        & $-3.024 \; (.670)^{***}$  \\
-$round^2$:as.factor(size)4 & $.245 \; (.129)$          & $-1.212 \; (.773)$        &                           \\
-$round^2$:as.factor(size)8 & $.579 \; (.125)^{***}$    & $-1.034 \; (.749)$        &                           \\
+$\beta_{12}$			& $-2.828 \; (.826)^{***}$  & $-6.880 \; (2.717)^{*}$   & $-3.319 \; (.478)^{***}$  \\
+$\beta_{22}$			& $.001 \; (.090)$        & $.712 \; (.535)$          &                           \\
+$\alpha_{2}$			& $52.821 \; (1.620)^{***}$ & $57.310 \; (2.978)^{***}$ & $53.749 \; (1.310)^{***}$ \\
+$\alpha_{4}$			& $52.336 \; (1.689)^{***}$ & $49.209 \; (3.105)^{***}$ & $51.706 \; (1.366)^{***}$ \\
+$\alpha_{8}$			& $56.500 \; (1.589)^{***}$ & $51.079 \; (2.920)^{***}$ & $52.690 \; (1.285)^{***}$ \\
+$\beta_{14}-\beta_{12}$  & $-3.816 \; (1.193)^{**}$  & $3.665 \; (3.925)$        & $-2.392 \; (.691)^{***}$  \\
+$\beta_{18}-\beta_{12}$  & $-6.927 \; (1.157)^{***}$ & $2.148 \; (3.805)$        & $-3.024 \; (.670)^{***}$  \\
+$\beta_{24}-\beta_{22}$  & $.245 \; (.129)$          & $-1.212 \; (.773)$        &                           \\
+$\beta_{28}-\beta_{22}$  & $.579 \; (.125)^{***}$    & $-1.034 \; (.749)$        &                           \\
 \hline
 AIC                     & 18344.270                 & 8983.404                  & 8980.375                  \\
 BIC                     & 18401.968                 & 9034.171                  & 9015.911                  \\
@@ -116,9 +118,17 @@ Num. obs.               & 2368                      & 1184                      
 \hline
 \multicolumn{4}{l}{\scriptsize{$^{***}p<0.001$, $^{**}p<0.01$, $^*p<0.05$}}
 \end{tabular}
-\caption{Comparison of general linear models. ``Full model'' shows the result of the model in equation \eqref{eq:glm} for all eight rounds. ``First 4 rounds'' shows the result of the same model, but only using the first four rounds, and ``No quad term'' shows the result with the first four rounds when the quadratic term is removed. }
-\label{tab:1}
+\caption{Comparison of regression models. ``Full model'' shows the result of the model in equation \eqref{eq:glm} for all eight rounds. ``First 4 rounds'' shows the result of the same model, but only using the first four rounds, and ``Final model'' shows the result with the first four rounds when the quadratic term is removed. Conversion to table was done with texreg \cite{leifeld2013texreg}.}
+\label{tab:2}
 \end{center}
 \end{table}
 
+The result of the full multiple linear regression model is shown in figure \ref{fig:full}. Groups of two players have a significantly lower learning rate than groups of four and eight players. Learning rates of 4- and 8-player groups are higher, and compare relatively well with previous findings (see figure \ref{fig:means} in the main text). There seems to be a small but significant difference in the learning rates between groups of four and eight in rounds 4-6, which disappears again in the last two rounds. We do not know whether this is due to some artificial last-round effects or a natural leveling off similar to the results in \citet{weber2003learning} as shown in Figure \ref{fig:means} in the main text.
 
+\begin{figure}[h]
+\includegraphics[width=1\textwidth]{../plots/fig3_full.pdf}\caption{Learning rates in terms of the decrease in the average guess for groups of 2 (red), 4 (yellow), and 8 (blue) players in the iterated beauty contest on Amazon Mechanical Turk. Crosses show the empirical means, full lines show the result of the multiple linear regression model and shaded areas are the 95\% confidence intervals.}
+\label{fig:full}
+\end{figure}
+
+
+However, we only compare the regression model to 4 rounds from other studies, hence a refitted model using only the first 4 rounds is shown in the second column of Table \ref{tab:2}. The fit is still very good with a very similar QQ-plot as in Figure \ref{fig:qq}. In this model the quadratic predictor is insignificant for the first 4 round (ANOVA likelihood ratio test, $p = 0.399$), so that it can be excluded in the final model used in the main text, for which the output is shown in the last column of Table \ref{tab:2}.
